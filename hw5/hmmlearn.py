@@ -7,7 +7,7 @@ transi_dic = {'_starting_tag': {'_ending_tag': '_count'}}
 transi_pro_dic = {}
 
  
-#construct the transition probability  
+#construct the transition probability
 def transi_occurance_compute(line):
  container = line.split(' ')
  index = 0
@@ -39,6 +39,9 @@ def transition_prob_compute():
         if k != 'count':
           transi_pro_dic[key][k] = v
 
+
+
+
 #emission diction has the format as transi_dic = [word][tag]
 emission_dic = {'_word': {'_tag': '_count'}}
 emission_prob_dic = {}
@@ -52,18 +55,17 @@ def emission_occurance_compute(line):
     word = container[emission_index].split('/')[0]
     tag = container[emission_index].split('/')[1]
     emission_index = emission_index + 1
-    if emission_dic.has_key(str(word)) == False:
-      emission_dic[str(word)] = {}
+    if emission_dic.has_key(str(tag)) == False:
+      emission_dic[str(tag)] = {}
       #initialize the count to be 1 
-      emission_dic[str(word)]['count'] = 1.0
+      emission_dic[str(tag)]['count'] = 1.0
+      emission_dic[str(tag)][word] = 1.0
     else:
-      emission_dic[str(word)]['count'] = emission_dic[str(word)]['count'] + 1
-      if emission_dic[str(word)].has_key(tag) == False:
-        emission_dic[str(word)][tag] = 1.0
+      emission_dic[str(tag)]['count'] = emission_dic[str(tag)]['count'] + 1
+      if emission_dic[str(tag)].has_key(word) == False:
+        emission_dic[str(tag)][word] = 1.0
       else:
-        emission_dic[str(word)][tag] = emission_dic[str(word)][tag] + 1
-
-
+        emission_dic[str(tag)][word] = emission_dic[str(tag)][word] + 1
 
 
 def emission_prob_compute():
@@ -74,7 +76,6 @@ def emission_prob_compute():
       for k,v in value.items():
         if value.has_key('count'):
           v = v/value['count']
-        if k != 'count':
           emission_prob_dic[key][k] = v
 
 
@@ -82,17 +83,16 @@ def emission_prob_compute():
 #Execute the function defined above
 with open(sys.argv[1]) as ft:
     for line in ft:
-        # transi_occurance_compute(line)
+        transi_occurance_compute(line)
         emission_occurance_compute(line)
 
-
+#call the computation function once for probability 
 transition_prob_compute()
 emission_prob_compute()
 
 
 output_json_data = {}
-#output_json_data['transi_pro_dic'] = transi_pro_dic
-# output_json_data['emission_dic'] = emission_dic
+output_json_data['transi_pro_dic'] = transi_pro_dic
 output_json_data['emission_prob_dic'] = emission_prob_dic
 
 with open('hmmmodel.txt', 'w') as outfile:
