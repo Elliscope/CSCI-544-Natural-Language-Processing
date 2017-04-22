@@ -15,16 +15,17 @@ def transi_occurance_compute(line):
   initial_tag = container[index].split('/')
   end_tag = container[index+1].split('/')
   index = index + 1
-  if transi_dic.has_key(str(initial_tag[1])) == False:
-    transi_dic[str(initial_tag[1])] = {}
+  if transi_dic.has_key(initial_tag[1]) == False:
+    transi_dic[initial_tag[1]] = {}
     #initialize the count to be 1 
-    transi_dic[str(initial_tag[1])]['count'] = 1.0
+    transi_dic[initial_tag[1]]['count'] = 1.0
+    transi_dic[initial_tag[1]][end_tag[1]] = 1.0
   else:
-    transi_dic[str(initial_tag[1])]['count'] = transi_dic[str(initial_tag[1])]['count'] + 1
-    if transi_dic[str(initial_tag[1])].has_key(end_tag[1]) == False:
-        transi_dic[str(initial_tag[1])][end_tag[1]] = 1.0
+    transi_dic[initial_tag[1]]['count'] = transi_dic[initial_tag[1]]['count'] + 1
+    if transi_dic[initial_tag[1]].has_key(end_tag[1]) == False:
+        transi_dic[initial_tag[1]][end_tag[1]] = 1.0
     else:
-        transi_dic[str(initial_tag[1])][end_tag[1]] = transi_dic[str(initial_tag[1])][end_tag[1]] + 1
+        transi_dic[initial_tag[1]][end_tag[1]] = transi_dic[initial_tag[1]][end_tag[1]] + 1
 
 
 

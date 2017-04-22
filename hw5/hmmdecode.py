@@ -23,15 +23,15 @@ Final_Prob = 0
 Ptemp = 1
 Prob = 1;
 
-# def viterbiAlgorithm(line,index,probability,prev_tag):
-  # word = line[index]
-  # if index == len(line):
-  #   return Final_Prob
-  # for key in emission_prob_dic[word]:
-  #   if transi_prob_dic[prev_tag].has_key(key):
-  #     Prob = Ptemp + math.log(emission_prob_dic[word][key]) + math.log(transi_prob_dic[prev_tag][key])
+def viterbiAlgorithm(line,index,probability,prev_tag):
+  word = line[index]
+  if index == len(line):
+    return Final_Prob
+  for key in emission_prob_dic[word]:
+    if transi_prob_dic[prev_tag].has_key(key):
+      Prob = Ptemp + math.log(emission_prob_dic[key][word]) + math.log(transi_prob_dic[prev_tag][key])
 
-  #   Ptemp = Prob
+    Ptemp = Prob
 
 
 #viterbi algorithm returns the probability
