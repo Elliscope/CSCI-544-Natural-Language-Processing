@@ -6,8 +6,6 @@ import os
 import numpy as np
 import math
 
-
-
 print sys.argv[1]
 print sys.argv[2]
 
@@ -21,29 +19,6 @@ ref_sentence_lengh_dic = {}
 candi_sentence_lengh_array = []
 best_match_length_array = []
 
-
-def find_nearest(array,value):
-    idx = (np.abs(array-value)).argmin()
-    return array[idx]
-
-#Function to compute the P value
-def getBLEUvalue(candidate_array,reference_data,BP):
-	BLEU = 0
-	for i in range(1,5):
-		print "HERE IS A I VALUE", i
-		Pvalue = getPvalue(candidate_data,reference_data,i)/candiCount(candi_sentence_lengh_array,i)
-		#print candiCount(candi_sentence_lengh_array,i)
-		BLEU = BLEU + 1/4 * math.log(Pvalue)
-	BLEU = BP * math.exp(BLEU)
-	return BLEU
-
-
-def getPvalue(candidate_data,reference_data,number):
-	Pcount = 0
-	for i in range(0,len(candidate_data)):
-		Pcount = Pcount + matchCount(candidate_data[i],reference_data_indexed[i],number)
-		#print "Pcount", Pcount
-	return Pcount
 
 #Function to get the match count for one sentence 
 def matchCount(candidate,reference_list,number):
@@ -66,11 +41,47 @@ def matchCount(candidate,reference_list,number):
 
 	#print "match count ", match_count
 	#print "refer_sen_dic",refer_sen_dic
-	#print "candidate_string_chain", candidate_string_chain
+	print "candidate_string_chain", candidate_string_chain
 	return match_count
+
+
+
+def getPvalue(candidate_data,reference_data,number):
+	Pcount = 0
+	print len(reference_data_indexed)
+	for i in range(0,len(candidate_data)):
+		if i < len(reference_data_indexed):
+			Pcount = Pcount + matchCount(candidate_data[i],reference_data_indexed[i],number)
+	return Pcount
+
 
 def candiCount(candidate_array,number):
 	return sum(candidate_array) + (number-1)*len(candidate_array)
+
+#Function to compute the P value
+def getBLEUvalue(candidate_array,reference_data,BP):
+	BLEU = 0
+	for i in range(1,5):
+		print "\n"
+		print "HERE IS A I VALUE", i
+		Pvalue = getPvalue(candidate_data,reference_data,i)/candiCount(candi_sentence_lengh_array,i)
+		print getPvalue(candidate_data,reference_data,i)
+		print candiCount(candi_sentence_lengh_array,i)
+		BLEU = BLEU + 1/4 * math.log(Pvalue)
+	BLEU = BP * math.exp(BLEU)
+	return BLEU
+
+
+def find_nearest(array,value):
+    idx = (np.abs(array-value)).argmin()
+    return array[idx]
+
+
+
+
+
+#EXECUTATION CODE
+
 
 #load the candidate file into array by sentence
 with open(sys.argv[1]) as fl:
@@ -80,15 +91,19 @@ with open(sys.argv[1]) as fl:
 #print candidate_data
 
 
-
 #load the reference file into a dictionry
-reference_file = os.listdir(sys.argv[2])
-ref_index = 0
-for file_name in reference_file:
-	with open(sys.argv[2]+file_name) as fd:
-		text = fd.read()
-		reference_data[ref_index] = re.split(r' *[\.\?!:][\'"\)\]]* *', text)
-		ref_index = ref_index + 1 
+if(os.path.isdir(sys.argv[2])):
+	reference_file = os.listdir(sys.argv[2])
+	ref_index = 0
+	for file_name in reference_file:
+		with open(sys.argv[2]+file_name) as fd:
+			text = fd.read()
+			reference_data[ref_index] = re.split(r' *[\.\?!:][\'"\)\]]* *', text)
+			ref_index = ref_index + 1 
+else:
+ with open(sys.argv[2]) as fd:
+  text = fd.read()
+  reference_data[0] = re.split(r' *[\.\?!:][\'"\)\]]* *', text)
 
 # print reference_file
 # print reference_data
@@ -118,16 +133,19 @@ for key, value in reference_data.iteritems():
 			reference_data_indexed[ref_length_index].append(line)
 		ref_length_index = ref_length_index+1
 
-#print ref_sentence_lengh_dic
+print ref_sentence_lengh_dic
+print len(candi_sentence_lengh_array)
 #print reference_data_indexed
 
 #find the best match with the above arrays
 for k in range(0,len(candi_sentence_lengh_array)):
 	candi_len = candi_sentence_lengh_array[k]
-	best_match_length_array.append(min(ref_sentence_lengh_dic[k], key=lambda x:abs(x-candi_len)))
+	if k in ref_sentence_lengh_dic:
+		best_match_length_array.append(min(ref_sentence_lengh_dic[k], key=lambda x:abs(x-candi_len)))
+	else:
+		best_match_length_array.append(0)
 
 #print best_match_length_array
-
 
 r = sum(best_match_length_array)
 c = sum(candi_sentence_lengh_array)
@@ -143,13 +161,11 @@ else:
 
 print BP
 
-
-print getBLEUvalue(candidate_data,reference_data,BP)
-
+BLEU = round(getBLEUvalue(candidate_data,reference_data,BP),12)
 
 
-
-
-
+with open('bleu_out.txt', 'w') as outfile:
+    outfile.write(str(BLEU))
+outfile.close()
 #write tou the float point to the following file
 #bleu_out.txt
