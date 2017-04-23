@@ -6,14 +6,10 @@ import os
 import numpy as np
 import math
 
-print sys.argv[1]
-print sys.argv[2]
 
 candidate_data = []
 reference_data = {}
 reference_data_indexed = {}
-
-ref_dic = []
 
 ref_sentence_lengh_dic = {}
 candi_sentence_lengh_array = []
@@ -21,7 +17,7 @@ best_match_length_array = []
 
 
 #Function to get the match count for one sentence 
-def matchCount(candidate,reference_list,number):
+def matchCount(candidate, reference_list, number):
 	refer_sen_dic = {}
 	match_count = 0
 
@@ -46,27 +42,32 @@ def matchCount(candidate,reference_list,number):
 
 
 
-def getPvalue(candidate_data,reference_data,number):
+def getPvalue(candidate_data, reference_data, number):
 	Pcount = 0
-	print len(reference_data_indexed)
-	for i in range(0,len(candidate_data)):
+	#print len(reference_data_indexed)
+	for i in range(0, len(candidate_data)):
 		if i < len(reference_data_indexed):
-			Pcount = Pcount + matchCount(candidate_data[i],reference_data_indexed[i],number)
+			Pcount = Pcount + matchCount(candidate_data[i], reference_data_indexed[i], number)
 	return Pcount
 
 
 def candiCount(candidate_array,number):
-	return sum(candidate_array) + (number-1)*len(candidate_array)
+	candi_count = 0
+	for value in candidate_array:
+		if value > number:
+			candi_count = candi_count + value - number + 1
+	return candi_count
+	#return sum(candidate_array) - (number-1)*len(candidate_array)
 
 #Function to compute the P value
-def getBLEUvalue(candidate_array,reference_data,BP):
+def getBLEUvalue(candidate_array, reference_data, BP):
 	BLEU = 0
-	for i in range(1,5):
+	for i in range(1, 5):
 		print "\n"
 		print "HERE IS A I VALUE", i
-		Pvalue = getPvalue(candidate_data,reference_data,i)/candiCount(candi_sentence_lengh_array,i)
+		Pvalue = getPvalue(candidate_data,reference_data, i)/candiCount(candi_sentence_lengh_array, i)
 		print getPvalue(candidate_data,reference_data,i)
-		print candiCount(candi_sentence_lengh_array,i)
+		print candiCount(candi_sentence_lengh_array, i)
 		BLEU = BLEU + 1/4 * math.log(Pvalue)
 	BLEU = BP * math.exp(BLEU)
 	return BLEU
@@ -75,9 +76,6 @@ def getBLEUvalue(candidate_array,reference_data,BP):
 def find_nearest(array,value):
     idx = (np.abs(array-value)).argmin()
     return array[idx]
-
-
-
 
 
 #EXECUTATION CODE
@@ -99,7 +97,7 @@ if(os.path.isdir(sys.argv[2])):
 		with open(sys.argv[2]+file_name) as fd:
 			text = fd.read()
 			reference_data[ref_index] = re.split(r' *[\.\?!:][\'"\)\]]* *', text)
-			ref_index = ref_index + 1 
+			ref_index = ref_index + 1
 else:
  with open(sys.argv[2]) as fd:
   text = fd.read()
@@ -161,7 +159,7 @@ else:
 
 print BP
 
-BLEU = round(getBLEUvalue(candidate_data,reference_data,BP),12)
+BLEU = round(getBLEUvalue(candidate_data, reference_data, BP), 12)
 
 
 with open('bleu_out.txt', 'w') as outfile:
