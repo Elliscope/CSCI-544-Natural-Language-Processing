@@ -40,8 +40,6 @@ def matchCount(candidate, reference_list, number):
 	print "candidate_string_chain", candidate_string_chain
 	return match_count
 
-
-
 def getPvalue(candidate_data, reference_data, number):
 	Pcount = 0
 	#print len(reference_data_indexed)
@@ -57,7 +55,6 @@ def candiCount(candidate_array,number):
 		if value > number:
 			candi_count = candi_count + value - number + 1
 	return candi_count
-	#return sum(candidate_array) - (number-1)*len(candidate_array)
 
 #Function to compute the P value
 def getBLEUvalue(candidate_array, reference_data, BP):
@@ -78,16 +75,10 @@ def find_nearest(array,value):
     return array[idx]
 
 
-#EXECUTATION CODE
-
-
 #load the candidate file into array by sentence
 with open(sys.argv[1]) as fl:
-	text = fl.read()
-	candidate_data = re.split(r' *[\.\?!:][\'"\)\]]* *', text)
-    
-#print candidate_data
-
+	for line in fl:
+		candidate_data.append(line)
 
 #load the reference file into a dictionry
 if(os.path.isdir(sys.argv[2])):
@@ -95,17 +86,16 @@ if(os.path.isdir(sys.argv[2])):
 	ref_index = 0
 	for file_name in reference_file:
 		with open(sys.argv[2]+file_name) as fd:
-			text = fd.read()
-			reference_data[ref_index] = re.split(r' *[\.\?!:][\'"\)\]]* *', text)
+			reference_data[ref_index] = []
+			for line in fd:
+				reference_data[ref_index].append(line)
 			ref_index = ref_index + 1
+
 else:
  with open(sys.argv[2]) as fd:
-  text = fd.read()
-  reference_data[0] = re.split(r' *[\.\?!:][\'"\)\]]* *', text)
-
-# print reference_file
-# print reference_data
-
+ 	reference_data[0]=[]
+ 	for line in fd:
+ 		reference_data[0].append(line)
 
 #Compute the BP score
 
@@ -113,7 +103,7 @@ else:
 for line in candidate_data:
 	word_array = line.split(' ')
 	candi_sentence_lengh_array.append(len(word_array))
-#print candi_sentence_lengh_array
+
 
 
 #Compute the R value
@@ -131,10 +121,6 @@ for key, value in reference_data.iteritems():
 			reference_data_indexed[ref_length_index].append(line)
 		ref_length_index = ref_length_index+1
 
-print ref_sentence_lengh_dic
-print len(candi_sentence_lengh_array)
-#print reference_data_indexed
-
 #find the best match with the above arrays
 for k in range(0,len(candi_sentence_lengh_array)):
 	candi_len = candi_sentence_lengh_array[k]
@@ -148,11 +134,8 @@ for k in range(0,len(candi_sentence_lengh_array)):
 r = sum(best_match_length_array)
 c = sum(candi_sentence_lengh_array)
 
-# print c
-# print r
-
 #Compute the BP according to the condition
-if c>=r:
+if c >=r:
 	BP = 1
 else:
 	BP = math.exp(1-r/c)
